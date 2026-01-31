@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Primary Meta Tags -->
+    <title>InfiVision | Precision AI Counting & Detection by Infispark</title>
+    <meta name="title" content="InfiVision | Precision AI Counting & Detection">
+    <meta name="description" content="InfiVision is a high-precision AI camera tool by Infispark, powered by Gemini VLM. Seamlessly count objects and detect items with industrial accuracy.">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="InfiVision | The Future of Visual AI">
+    <meta property="og:description" content="Stop counting manually. Use InfiVision's Neural Reticle to detect and count thousands of objects in seconds with AR-grade precision.">
+    <meta property="og:image" content="https://infispark.com/infivision-preview.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="InfiVision AI Camera">
+    <meta property="twitter:description" content="High-precision object detection and counting for the modern era. Developed by Infispark.">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Tailwind Configuration for Custom Colors/Fonts -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark: '#0f0518',     /* Deepest Purple Background */
+                            surface: '#1a0b2e',  /* Slightly lighter for cards */
+                            primary: '#8b5cf6',  /* Violet-500 matching logo body */
+                            glow: '#a78bfa',     /* Violet-400 for glows */
+                            sparkle: '#38bdf8',  /* Sky-400 matching the star */
+                        },
+                    },
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                    },
+                    animation: {
+                        'spin-slow': 'spin 15s linear infinite',
+                        'spin-reverse-slow': 'spin-reverse 20s linear infinite',
+                        'pulse-glow': 'pulse-glow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                        'shimmer': 'shimmer 2s linear infinite',
+                    },
+                    keyframes: {
+                        'spin-reverse': {
+                            '0%': { transform: 'rotate(0deg)' },
+                            '100%': { transform: 'rotate(-360deg)' },
+                        },
+                        'pulse-glow': {
+                            '0%, 100%': { opacity: '1', boxShadow: '0 0 15px #8b5cf6' },
+                            '50%': { opacity: '.7', boxShadow: '0 0 30px #a78bfa' },
+                        },
+                        'float': {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        },
+                        'shimmer': {
+                            '0%': { backgroundPosition: '-1000px 0' },
+                            '100%': { backgroundPosition: '1000px 0' }
+                        }
+                    },
+                    backgroundImage: {
+                        'logo-gradient': 'linear-gradient(135deg, #6d28d9 0%, #4c1d95 100%)',
+                        'btn-gradient': 'linear-gradient(to right, #7c3aed, #3b82f6)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body {
+            background-color: #0f0518; /* Brand Dark */
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        /* Sci-fi Grid Background - Adjusted for Purple */
+        .bg-grid {
+            background-size: 50px 50px;
+            background-image: 
+                linear-gradient(to right, rgba(139, 92, 246, 0.05) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(139, 92, 246, 0.05) 1px, transparent 1px);
+            mask-image: radial-gradient(circle at center, black, transparent 80%);
+            -webkit-mask-image: radial-gradient(circle at center, black, transparent 80%);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f0518; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4c1d95; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #8b5cf6; 
+        }
+
+        .text-glow {
+            text-shadow: 0 0 20px rgba(139, 92, 246, 0.6);
+        }
+        
+        .box-glow {
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.1);
+        }
+
+        .reticle-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.4;
+        }
+
+        /* Video Play Button Overlay */
+        .play-overlay {
+            background: rgba(15, 5, 24, 0.6);
+            transition: all 0.3s ease;
+        }
+        .group:hover .play-overlay {
+            background: rgba(15, 5, 24, 0.3);
+        }
+        .play-icon {
+            transition: all 0.3s ease;
+        }
+        .group:hover .play-icon {
+            transform: scale(1.1);
+            color: #38bdf8; /* Sparkle Blue */
+        }
+        
+        /* Glassmorphism utility */
+        .glass {
+            background: rgba(26, 11, 46, 0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-brand-primary selection:text-white">
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 bg-[#0f0518]/80 backdrop-blur-md border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex items-center gap-2">
+                    <!-- Simple Logo Icon matching the new brand -->
+                    <div class="w-8 h-8 rounded-lg bg-logo-gradient flex items-center justify-center relative overflow-hidden shadow-[0_0_10px_#8b5cf6]">
+                        <div class="w-4 h-4 rounded-full border-2 border-white/90"></div>
+                        <!-- Tiny sparkle hint -->
+                        <div class="absolute top-1 right-1 w-1.5 h-1.5 bg-brand-sparkle rotate-45"></div>
+                    </div>
+                    <span class="text-2xl font-bold tracking-tighter text-white">INFISPARK</span>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-8">
+                        <a href="#features" class="hover:text-brand-primary transition-colors duration-300">Features</a>
+                        <a href="#ui" class="hover:text-brand-primary transition-colors duration-300">Interface</a>
+                        <a href="#download" class="hover:text-brand-primary transition-colors duration-300">Use Cases</a>
+                        <a href="#about" class="hover:text-brand-primary transition-colors duration-300">About</a>
+                    </div>
+                </div>
+                <div>
+                    <a href="#get-app" class="px-6 py-2 bg-white/5 border border-brand-primary/50 text-brand-primary hover:bg-brand-primary hover:text-white transition-all duration-300 font-semibold rounded-full uppercase tracking-wider text-sm shadow-[0_0_15px_rgba(139,92,246,0.3)] hover:shadow-[0_0_20px_rgba(139,92,246,0.6)]">
+                        Get Beta
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
+        <!-- Background Grid -->
+        <div class="absolute inset-0 bg-grid z-0"></div>
+        
+        <!-- Gradient Orbs for vibe -->
+        <div class="absolute top-20 left-20 w-96 h-96 bg-brand-primary/20 rounded-full blur-[100px] pointer-events-none"></div>
+        <div class="absolute bottom-20 right-20 w-96 h-96 bg-brand-sparkle/10 rounded-full blur-[100px] pointer-events-none"></div>
+
+        <!-- Animated Reticle Background - Updated Colors -->
+        <div class="reticle-container w-[800px] h-[800px]">
+            <!-- Outer Ring -->
+            <div class="absolute inset-0 border border-white/10 rounded-full border-dashed animate-spin-slow"></div>
+            <!-- Middle Ring -->
+            <div class="absolute inset-[50px] border border-brand-primary/20 rounded-full border-solid"></div>
+            <!-- Inner Ring -->
+            <div class="absolute inset-[100px] border border-brand-sparkle/30 rounded-full border-dotted animate-spin-reverse-slow"></div>
+            <!-- Crosshairs -->
+            <div class="absolute top-1/2 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-brand-primary/40 to-transparent"></div>
+            <div class="absolute left-1/2 top-0 h-full w-[1px] bg-gradient-to-b from-transparent via-brand-primary/40 to-transparent"></div>
+        </div>
+
+        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="inline-block mb-6 px-4 py-1 rounded-full border border-brand-primary/30 bg-brand-surface text-brand-sparkle text-sm tracking-widest uppercase shadow-[0_0_10px_rgba(56,189,248,0.3)]">
+                <i data-lucide="sparkles" class="inline w-3 h-3 mb-1 mr-1"></i> Powered by Gemini VLM
+            </div>
+            
+            <h1 class="text-5xl md:text-7xl font-bold tracking-tight mb-6 leading-tight">
+                The World Through a <br/>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary via-purple-400 to-brand-sparkle text-glow">Precise Lens.</span>
+            </h1>
+            
+            <p class="mt-4 max-w-2xl mx-auto text-xl text-gray-400">
+                <span class="text-white font-semibold">InfiVision</span> transforms your smartphone into a high-precision industrial scanner. Detect, count, and analyze your world with neural accuracy.
+            </p>
+            
+            <div class="mt-10 flex flex-col sm:flex-row justify-center gap-6">
+                <!-- Primary Button matching logo gradient -->
+                <a href="#get-app" class="group relative px-8 py-4 bg-btn-gradient text-white font-bold text-lg rounded-xl overflow-hidden transition-all duration-300 hover:scale-105 shadow-[0_0_25px_rgba(124,58,237,0.5)]">
+                    <span class="relative z-10 flex items-center justify-center gap-2">
+                        <i data-lucide="download"></i> Download Beta APK
+                    </span>
+                    <div class="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
+                </a>
+                
+                <button onclick="document.getElementById('intro-video').scrollIntoView({behavior: 'smooth'})" class="px-8 py-4 border border-white/20 text-white font-bold text-lg rounded-xl hover:bg-white/5 transition-all duration-300 flex items-center justify-center gap-2">
+                    <i data-lucide="play-circle" class="text-brand-sparkle"></i> Watch AI in Action
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Download & Video Hub -->
+    <section id="get-app" class="py-20 relative border-t border-white/5 bg-[#12071f]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                
+                <!-- Left: App Icon & Intro Video -->
+                <div class="space-y-8">
+                    <div class="flex items-center gap-6 mb-8">
+                        <!-- App Icon Visualization - MATCHING USER LOGO -->
+                        <div class="w-24 h-24 bg-logo-gradient rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(139,92,246,0.4)] animate-float relative overflow-hidden group">
+                            <!-- Camera Ring -->
+                            <div class="w-14 h-14 bg-gray-900 rounded-full border-4 border-gray-200 shadow-inner flex items-center justify-center relative z-10">
+                                <!-- Lens reflection -->
+                                <div class="w-10 h-10 bg-black rounded-full overflow-hidden relative">
+                                    <div class="absolute top-1 left-2 w-4 h-4 bg-blue-500/30 rounded-full blur-[2px]"></div>
+                                </div>
+                            </div>
+                            <!-- Sticker Peel Effect (CSS Simulation) -->
+                            <div class="absolute top-1/2 left-1/2 w-14 h-14 -translate-x-1/2 -translate-y-1/2 rounded-full border-t-4 border-l-4 border-white/10 pointer-events-none"></div>
+                            
+                            <!-- Sparkle Star -->
+                            <div class="absolute top-4 right-4 text-brand-sparkle drop-shadow-[0_0_8px_rgba(56,189,248,0.8)]">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 0L14.59 9.41L24 12L14.59 14.59L12 24L9.41 14.59L0 12L9.41 9.41L12 0Z" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-3xl font-bold text-white">InfiVision App</h3>
+                            <p class="text-brand-primary font-medium">Version 1.0 Beta</p>
+                        </div>
+                    </div>
+
+                    <!-- App Intro Video Placeholder -->
+                    <div id="intro-video" class="w-full h-[600px] bg-gray-900 rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
+                        <video 
+                            src="https://infisparks.github.io/images/Infivisino-demo.mp4" 
+                            poster="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=1000"
+                            controls
+                            class="w-full h-full object-contain bg-black">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                </div>
+
+                <!-- Right: Download Tutorial & CTA -->
+                <div class="glass p-8 rounded-3xl backdrop-blur-sm flex flex-col justify-center h-full">
+                    <h2 class="text-3xl font-bold text-white mb-4">Ready to Start?</h2>
+                    <p class="text-gray-400 mb-8 leading-relaxed">
+                        Get the latest beta version of InfiVision. Experience industrial-grade counting precision on your personal device today.
+                    </p>
+
+                    <a href="https://cvcmjtyamlwgkcmsiemd.supabase.co/storage/v1/object/public/logos/InfiVision.apk" class="block w-full text-center py-5 bg-btn-gradient text-white font-bold text-xl rounded-xl hover:shadow-[0_0_25px_rgba(59,130,246,0.5)] transition-all duration-300 transform hover:scale-[1.02]">
+                        Download Now (15MB)
+                    </a>
+                    
+                    <div class="mt-8 flex items-center justify-center gap-6 text-sm text-gray-500">
+                        <span class="flex items-center gap-2"><i data-lucide="shield-check" class="w-4 h-4 text-green-400"></i> Verified Safe</span>
+                        <span class="flex items-center gap-2"><i data-lucide="smartphone" class="w-4 h-4 text-brand-primary"></i> Android 12+</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Key Features Section -->
+    <section id="features" class="py-24 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                
+                <!-- Feature 1 -->
+                <div class="p-8 border border-white/5 bg-brand-surface rounded-2xl hover:border-brand-primary/50 transition-colors duration-300 box-glow group">
+                    <div class="w-12 h-12 bg-brand-primary/20 rounded-xl flex items-center justify-center mb-6 text-brand-primary group-hover:scale-110 transition-transform">
+                        <i data-lucide="hash" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Neural Verification Counting</h3>
+                    <p class="text-gray-400 leading-relaxed">
+                        Stop second-guessing. Our AI doesn't just count; it tags every object with a unique digital identifier so you can verify results in real-time.
+                    </p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="p-8 border border-white/5 bg-brand-surface rounded-2xl hover:border-brand-primary/50 transition-colors duration-300 box-glow group">
+                    <div class="w-12 h-12 bg-brand-primary/20 rounded-xl flex items-center justify-center mb-6 text-brand-primary group-hover:scale-110 transition-transform">
+                        <i data-lucide="scan-line" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">AR-Grade Detection</h3>
+                    <p class="text-gray-400 leading-relaxed">
+                        InfiVision uses Augmented Reality brackets and pulsing neural nodes (colored in our signature violet) to pin-point objects in dense clusters.
+                    </p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="p-8 border border-white/5 bg-brand-surface rounded-2xl hover:border-brand-primary/50 transition-colors duration-300 box-glow group">
+                    <div class="w-12 h-12 bg-brand-primary/20 rounded-xl flex items-center justify-center mb-6 text-brand-primary group-hover:scale-110 transition-transform">
+                        <i data-lucide="cpu" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">InfiSpark Logic Engine</h3>
+                    <p class="text-gray-400 leading-relaxed">
+                        Built on the cutting edge of Vision-Language Models (VLM), our app understands context—recognizing everything from surgical tools to industrial pipes.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Visual UI Section -->
+    <section id="ui" class="py-24 bg-[#0a0312] border-y border-white/5">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                
+                <div class="order-2 lg:order-1 relative">
+                    <!-- Mock Phone UI -->
+                    <div class="relative mx-auto border-gray-800 bg-gray-900 border-[14px] rounded-[2.5rem] h-[600px] w-[300px] shadow-2xl flex flex-col overflow-hidden">
+                        <div class="h-[32px] w-[3px] bg-gray-800 absolute -left-[17px] top-[72px] rounded-l-lg"></div>
+                        <div class="h-[46px] w-[3px] bg-gray-800 absolute -left-[17px] top-[124px] rounded-l-lg"></div>
+                        <div class="h-[46px] w-[3px] bg-gray-800 absolute -left-[17px] top-[178px] rounded-l-lg"></div>
+                        <div class="h-[64px] w-[3px] bg-gray-800 absolute -right-[17px] top-[142px] rounded-r-lg"></div>
+                        
+                        <!-- Screen Content -->
+                        <div class="w-full h-full bg-black relative p-4 flex flex-col justify-between overflow-hidden">
+                            <!-- Background Camera Feed Sim -->
+                            <div class="absolute inset-0 bg-gray-800 opacity-20"></div>
+
+                            <!-- Header -->
+                            <div class="relative z-10 flex justify-between items-center text-white text-xs font-mono">
+                                <span class="bg-red-500/80 px-2 py-0.5 rounded">LIVE</span>
+                                <span class="flex items-center gap-1"><div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div> VLM ACTIVE</span>
+                            </div>
+                            
+                            <!-- Center Reticle - Matching Brand -->
+                            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 border border-white/20 rounded-full flex items-center justify-center">
+                                <div class="w-40 h-40 border-2 border-dashed border-brand-primary rounded-full animate-spin-slow"></div>
+                                <div class="absolute w-full h-[1px] bg-brand-primary/30"></div>
+                                <div class="absolute h-full w-[1px] bg-brand-primary/30"></div>
+                                
+                                <!-- Detected Objects simulation -->
+                                <div class="absolute top-0 right-0 px-2 py-1 bg-brand-primary/90 text-white rounded text-xs shadow-lg">Pipe #23</div>
+                                <div class="absolute bottom-4 left-4 px-2 py-1 bg-brand-primary/90 text-white rounded text-xs shadow-lg">Pipe #24</div>
+                            </div>
+
+                            <!-- Bottom UI -->
+                            <div class="relative z-10 bg-brand-surface/90 backdrop-blur p-4 rounded-xl border border-white/10">
+                                <div class="flex justify-between items-end">
+                                    <div>
+                                        <p class="text-xs text-gray-400">Total Count</p>
+                                        <p class="text-3xl font-bold text-white tracking-widest">042</p>
+                                    </div>
+                                    <!-- Shutter Button -->
+                                    <button class="w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-[0_0_20px_white] hover:scale-105 transition-transform">
+                                        <div class="w-12 h-12 rounded-full border-2 border-gray-300"></div>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="order-1 lg:order-2">
+                    <h2 class="text-4xl md:text-5xl font-bold mb-6 text-white">A Futuristic Interface.</h2>
+                    <p class="text-xl text-gray-400 mb-8 leading-relaxed">
+                        Experience the <span class="text-brand-primary font-semibold">Neural Reticle</span>. Our unique interface uses dynamic violet rays and spark-blue highlights to stabilize and analyze frames before you even tap the shutter.
+                    </p>
+                    <ul class="space-y-4">
+                        <li class="flex items-center gap-4 text-gray-300">
+                            <i data-lucide="check-circle" class="text-brand-primary"></i> Real-time Stabilization
+                        </li>
+                        <li class="flex items-center gap-4 text-gray-300">
+                            <i data-lucide="check-circle" class="text-brand-primary"></i> Dynamic Object Highlighting
+                        </li>
+                        <li class="flex items-center gap-4 text-gray-300">
+                            <i data-lucide="check-circle" class="text-brand-primary"></i> Heads-Up Data Display
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Industry Use Cases -->
+    <section id="download" class="py-24 bg-gradient-to-t from-brand-dark to-[#12071f]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-bold text-center mb-16"><span class="border-b-2 border-brand-primary pb-2">Industry Applications</span></h2>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Case 1 -->
+                <div class="bg-brand-surface border border-white/5 p-6 rounded-2xl hover:border-brand-primary transition-all duration-300 group hover:-translate-y-1">
+                    <i data-lucide="truck" class="w-10 h-10 text-gray-500 group-hover:text-brand-primary mb-4 transition-colors"></i>
+                    <h4 class="text-lg font-bold text-white mb-2">Logistics & Inventory</h4>
+                    <p class="text-sm text-gray-400">Count an entire warehouse shelf in one photo.</p>
+                </div>
+
+                <!-- Case 2 -->
+                <div class="bg-brand-surface border border-white/5 p-6 rounded-2xl hover:border-brand-primary transition-all duration-300 group hover:-translate-y-1">
+                    <i data-lucide="hard-hat" class="w-10 h-10 text-gray-500 group-hover:text-brand-primary mb-4 transition-colors"></i>
+                    <h4 class="text-lg font-bold text-white mb-2">Construction</h4>
+                    <p class="text-sm text-gray-400">Audit pipes, screws, and materials instantly.</p>
+                </div>
+
+                <!-- Case 3 -->
+                <div class="bg-brand-surface border border-white/5 p-6 rounded-2xl hover:border-brand-primary transition-all duration-300 group hover:-translate-y-1">
+                    <i data-lucide="shopping-bag" class="w-10 h-10 text-gray-500 group-hover:text-brand-primary mb-4 transition-colors"></i>
+                    <h4 class="text-lg font-bold text-white mb-2">Retail</h4>
+                    <p class="text-sm text-gray-400">Real-time stock verification with high-precision tagging.</p>
+                </div>
+
+                <!-- Case 4 -->
+                <div class="bg-brand-surface border border-white/5 p-6 rounded-2xl hover:border-brand-primary transition-all duration-300 group hover:-translate-y-1">
+                    <i data-lucide="microscope" class="w-10 h-10 text-gray-500 group-hover:text-brand-primary mb-4 transition-colors"></i>
+                    <h4 class="text-lg font-bold text-white mb-2">Medical & Research</h4>
+                    <p class="text-sm text-gray-400">Detect and count samples with professional-grade accuracy.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Company -->
+    <section id="about" class="py-24 bg-brand-dark relative overflow-hidden">
+        <!-- Decoration -->
+        <div class="absolute -left-20 top-20 w-64 h-64 bg-brand-primary/10 rounded-full blur-3xl"></div>
+        <div class="absolute -right-20 bottom-20 w-64 h-64 bg-brand-primary/10 rounded-full blur-3xl"></div>
+
+        <div class="relative z-10 max-w-4xl mx-auto px-4 text-center">
+            <h2 class="text-4xl font-bold mb-6">Sparking the Infinite.</h2>
+            <p class="text-xl text-gray-400 leading-relaxed">
+                At <span class="text-white font-semibold">Infispark</span>, we believe AI shouldn't just be smart—it should be useful. InfiVision is our first step toward a future where every camera is a tool for professional productivity.
+            </p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-brand-dark border-t border-white/5 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="flex items-center gap-2">
+                    <div class="w-6 h-6 border border-gray-600 rounded flex items-center justify-center">
+                        <div class="w-2 h-2 bg-gray-600 rounded-full"></div>
+                    </div>
+                    <span class="text-gray-400 font-bold tracking-wider">INFISPARK</span>
+                </div>
+                
+                <div class="flex gap-6 text-sm text-gray-500">
+                    <a href="#" class="hover:text-brand-primary transition-colors">Privacy Policy</a>
+                    <a href="#" class="hover:text-brand-primary transition-colors">Terms of Service</a>
+                    <a href="#" class="hover:text-brand-primary transition-colors">Contact Support</a>
+                    <a href="#" class="hover:text-brand-primary transition-colors">Documentation</a>
+                </div>
+            </div>
+            <div class="mt-8 text-center text-xs text-gray-700">
+                &copy; 2026 Infispark. All Rights Reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Intersection Observer for fade-in animations
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.remove('opacity-0', 'translate-y-10');
+                    entry.target.classList.add('opacity-100', 'translate-y-0');
+                }
+            });
+        }, observerOptions);
+
+        // Apply fade-in classes to sections
+        document.querySelectorAll('section > div').forEach(el => {
+            el.classList.add('transition-all', 'duration-1000', 'opacity-0', 'translate-y-10');
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
